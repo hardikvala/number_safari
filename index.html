@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Number Safari - Big vs Small</title>
+  <title>Number Safari - Tap to Choose</title>
   <style>
     body {
       margin: 0;
@@ -33,35 +34,19 @@
       justify-content: center;
       padding-top: 60px;
     }
-    .number-card {
-      width: 120px;
-      height: 120px;
+    .number-button {
+      width: 140px;
+      height: 140px;
       background: #f9f9f9;
       border: 3px solid #ccc;
       font-size: 48px;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin: 10px;
+      margin: 20px;
       border-radius: 16px;
-      cursor: grab;
-    }
-    #dropzones {
-      display: flex;
-      justify-content: center;
-      margin-top: 30px;
-    }
-    .dropzone {
-      width: 160px;
-      height: 140px;
-      border: 3px dashed #aaa;
-      margin: 0 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      font-size: 18px;
-      background-color: #f2fff2;
+      cursor: pointer;
+      user-select: none;
     }
     .feedback, .scoreBoard {
       font-size: 20px;
@@ -96,13 +81,9 @@
 
   <div id="gameContainer" class="game-container">
     <div id="question">Which number is bigger?</div>
-    <div id="cards">
-      <div class="number-card" id="leftCard" draggable="true"></div>
-      <div class="number-card" id="rightCard" draggable="true"></div>
-    </div>
-    <div id="dropzones">
-      <div class="dropzone" id="dropBig">Drop Bigger</div>
-      <div class="dropzone" id="dropSmall">Drop Smaller</div>
+    <div>
+      <div class="number-button" id="leftBtn"></div>
+      <div class="number-button" id="rightBtn"></div>
     </div>
     <div class="feedback" id="feedback"></div>
     <div class="scoreBoard" id="scoreBoard"></div>
@@ -115,8 +96,8 @@
     let leftNumber = 0;
     let rightNumber = 0;
 
-    const leftCard = document.getElementById("leftCard");
-    const rightCard = document.getElementById("rightCard");
+    const leftBtn = document.getElementById("leftBtn");
+    const rightBtn = document.getElementById("rightBtn");
     const feedback = document.getElementById("feedback");
     const scoreBoard = document.getElementById("scoreBoard");
     const question = document.getElementById("question");
@@ -130,8 +111,8 @@
       while (leftNumber === rightNumber) {
         rightNumber = Math.floor(Math.random() * 100);
       }
-      leftCard.textContent = leftNumber;
-      rightCard.textContent = rightNumber;
+      leftBtn.textContent = leftNumber;
+      rightBtn.textContent = rightNumber;
     }
 
     function startGame(type) {
@@ -140,12 +121,11 @@
       score = 0;
       feedback.textContent = "";
       scoreBoard.textContent = "";
+      scoreBoard.style.display = "none";
       mainMenu.style.display = "none";
       mainMenuBtn.style.display = "block";
       gameContainer.style.display = "flex";
       question.textContent = type === 'bigger' ? "Which number is bigger?" : "Which number is smaller?";
-      leftCard.draggable = true;
-      rightCard.draggable = true;
       generateNumbers();
     }
 
@@ -155,14 +135,13 @@
       mainMenuBtn.style.display = "none";
     }
 
-    function handleDrop(e, dropType) {
-      const draggedId = e.dataTransfer.getData("text/plain");
-      const draggedNumber = draggedId === "leftCard" ? leftNumber : rightNumber;
-      const otherNumber = draggedId === "leftCard" ? rightNumber : leftNumber;
+    function handleTap(side) {
+      const chosen = side === "left" ? leftNumber : rightNumber;
+      const other = side === "left" ? rightNumber : leftNumber;
 
       const correct = gameType === "bigger"
-        ? (dropType === "dropBig" && draggedNumber > otherNumber)
-        : (dropType === "dropSmall" && draggedNumber < otherNumber);
+        ? (chosen > other)
+        : (chosen < other);
 
       if (correct) {
         feedback.textContent = "✅ Correct!";
@@ -177,8 +156,6 @@
         feedback.textContent = "";
         scoreBoard.style.display = "block";
         scoreBoard.textContent = `You got ${score} out of 10 right!`;
-        leftCard.draggable = false;
-        rightCard.draggable = false;
       } else {
         setTimeout(() => {
           feedback.textContent = "";
@@ -187,18 +164,8 @@
       }
     }
 
-    leftCard.addEventListener("dragstart", (e) => {
-      e.dataTransfer.setData("text/plain", "leftCard");
-    });
-    rightCard.addEventListener("dragstart", (e) => {
-      e.dataTransfer.setData("text/plain", "rightCard");
-    });
-
-    document.getElementById("dropBig").addEventListener("dragover", (e) => e.preventDefault());
-    document.getElementById("dropSmall").addEventListener("dragover", (e) => e.preventDefault());
-
-    document.getElementById("dropBig").addEventListener("drop", (e) => handleDrop(e, "dropBig"));
-    document.getElementById("dropSmall").addEventListener("drop", (e) => handleDrop(e, "dropSmall"));
+    leftBtn.addEventListener("click", () => handleTap("left"));
+    rightBtn.addEventListener("click", () => handleTap("right"));
   </script>
 </body>
 </html>
