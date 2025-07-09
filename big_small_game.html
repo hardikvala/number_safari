@@ -1,54 +1,171 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Big vs Small Number Game</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Number Safari - Tap to Choose</title>
   <style>
     body {
-      font-family: 'Comic Sans MS', cursive;
-      background-color: #fefae0;
-      text-align: center;
-      padding: 20px;
+      margin: 0;
+      font-family: sans-serif;
+      background: linear-gradient(to bottom, #d1f7c4, #fff);
+      min-height: 100vh;
     }
-    h1 {
-      color: #f77f00;
-    }
-    .question {
-      font-size: 24px;
-      margin: 30px;
-    }
-    .btn {
-      padding: 15px 30px;
-      margin: 10px;
-      font-size: 18px;
-      border-radius: 10px;
-      border: none;
-      background-color: #90be6d;
-      color: white;
+    #mainMenuBtn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 10px 15px;
+      font-size: 16px;
+      background: #fff;
+      border: 2px solid #4CAF50;
+      border-radius: 8px;
       cursor: pointer;
     }
-    .btn:hover {
-      background-color: #43aa8b;
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .game-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-top: 60px;
+    }
+    .number-button {
+      width: 140px;
+      height: 140px;
+      background: #f9f9f9;
+      border: 3px solid #ccc;
+      font-size: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px;
+      border-radius: 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .feedback, .scoreBoard {
+      font-size: 20px;
+      margin: 20px;
+    }
+    .menu-buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 60px;
+    }
+    .menu-buttons button {
+      padding: 15px 25px;
+      font-size: 18px;
+      margin: 10px;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>Big vs Small</h1>
-  <div class="question" id="question">Which number is bigger?</div>
-  <div id="options">
-    <button class="btn" onclick="checkAnswer(1)">1</button>
-    <button class="btn" onclick="checkAnswer(2)">2</button>
+  <div id="mainMenu" class="menu-buttons">
+    <h1>Number Safari</h1>
+    <button onclick="startGame('bigger')">Play: Find the Bigger Number</button>
+    <button onclick="startGame('smaller')">Play: Find the Smaller Number</button>
   </div>
+
+  <button id="mainMenuBtn" onclick="goToMainMenu()" style="display: none;">Go to Main Menu</button>
+
+  <div id="gameContainer" class="game-container">
+    <div id="question">Which number is bigger?</div>
+    <div>
+      <div class="number-button" id="leftBtn"></div>
+      <div class="number-button" id="rightBtn"></div>
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <div class="scoreBoard" id="scoreBoard"></div>
+  </div>
+
   <script>
-    let correct = 2;
-    function checkAnswer(ans) {
-      if (ans === correct) {
-        alert('Correct!');
+    let gameType = "bigger";
+    let level = 1;
+    let score = 0;
+    let leftNumber = 0;
+    let rightNumber = 0;
+
+    const leftBtn = document.getElementById("leftBtn");
+    const rightBtn = document.getElementById("rightBtn");
+    const feedback = document.getElementById("feedback");
+    const scoreBoard = document.getElementById("scoreBoard");
+    const question = document.getElementById("question");
+    const mainMenu = document.getElementById("mainMenu");
+    const gameContainer = document.getElementById("gameContainer");
+    const mainMenuBtn = document.getElementById("mainMenuBtn");
+
+    function generateNumbers() {
+      leftNumber = Math.floor(Math.random() * 100);
+      rightNumber = Math.floor(Math.random() * 100);
+      while (leftNumber === rightNumber) {
+        rightNumber = Math.floor(Math.random() * 100);
+      }
+      leftBtn.textContent = leftNumber;
+      rightBtn.textContent = rightNumber;
+    }
+
+    function startGame(type) {
+      gameType = type;
+      level = 1;
+      score = 0;
+      feedback.textContent = "";
+      scoreBoard.textContent = "";
+      scoreBoard.style.display = "none";
+      mainMenu.style.display = "none";
+      mainMenuBtn.style.display = "block";
+      gameContainer.style.display = "flex";
+      question.textContent = type === 'bigger' ? "Which number is bigger?" : "Which number is smaller?";
+      generateNumbers();
+    }
+
+    function goToMainMenu() {
+      mainMenu.style.display = "flex";
+      gameContainer.style.display = "none";
+      mainMenuBtn.style.display = "none";
+    }
+
+    function handleTap(side) {
+      const chosen = side === "left" ? leftNumber : rightNumber;
+      const other = side === "left" ? rightNumber : leftNumber;
+
+      const correct = gameType === "bigger"
+        ? (chosen > other)
+        : (chosen < other);
+
+      if (correct) {
+        feedback.textContent = "✅ Correct!";
+        score++;
       } else {
-        alert('Try Again!');
+        feedback.textContent = "❌ Oops, try next!";
+      }
+
+      level++;
+
+      if (level > 10) {
+        feedback.textContent = "";
+        scoreBoard.style.display = "block";
+        scoreBoard.textContent = `You got ${score} out of 10 right!`;
+      } else {
+        setTimeout(() => {
+          feedback.textContent = "";
+          generateNumbers();
+        }, 1000);
       }
     }
+
+    leftBtn.addEventListener("click", () => handleTap("left"));
+    rightBtn.addEventListener("click", () => handleTap("right"));
   </script>
 </body>
 </html>
